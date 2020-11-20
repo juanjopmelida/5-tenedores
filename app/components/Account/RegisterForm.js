@@ -1,6 +1,8 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
+import { size, isEmpty } from "lodash";
+import { validateEmail } from "../../utils/validations";
 
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -8,12 +10,25 @@ export default function RegisterForm() {
   const [formData, setFormData] = useState(defaultFormValue);
 
   const onSubmit = () => {
-    console.log(FormData);
+    if (
+      isEmpty(formData.email) ||
+      isEmpty(formData.password) ||
+      isEmpty(formData.repeatPassword)
+    ) {
+      console.log("todos los campos son oppbligatiorios");
+    } else if (!validateEmail(formData.email)) {
+      console.log("el email no es correcto");
+    } else if (formData.password !== formData.repeatPassword) {
+      console.log("las contraseñas tienen que ser iguales");
+    } else if (size(formdata.password) < 6) {
+      console.log("la contraseña tiene que tener al menos 6 caracteres");
+    } else {
+      console.log("ok");
+    }
   };
 
   const onChange = (e, type) => {
-    console.log(e.nativeEvent.text);
-    setFormData({ ...FormData, [type]: e.nativeEvent.text });
+    setFormData({ ...formData, [type]: e.nativeEvent.text });
   };
 
   return (
