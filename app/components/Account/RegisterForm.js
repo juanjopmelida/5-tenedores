@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Input, Icon, Button } from "react-native-elements";
-import { size, isEmpty } from "lodash";
 import { validateEmail } from "../../utils/validations";
+import { size, isEmpty } from "lodash";
+import * as firebase from "firebase";
+import { useNavigation } from "@react-navigation/native";
 
-export default function RegisterForm() {
+export default function RegisterForm(props) {
+  const { toastRef } = props;
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
   const [formData, setFormData] = useState(defaultFormValue);
+  const navigation = useNavigation();
 
   const onSubmit = () => {
     if (
@@ -15,15 +19,25 @@ export default function RegisterForm() {
       isEmpty(formData.password) ||
       isEmpty(formData.repeatPassword)
     ) {
-      console.log("todos los campos son oppbligatiorios");
+      toastRef.current.show("Todos los campos son obligatorios");
     } else if (!validateEmail(formData.email)) {
-      console.log("el email no es correcto");
+      toastRef.current.show("El email no es correcto");
     } else if (formData.password !== formData.repeatPassword) {
-      console.log("las contraseñas tienen que ser iguales");
-    } else if (size(formdata.password) < 6) {
-      console.log("la contraseña tiene que tener al menos 6 caracteres");
+      toastRef.current.show("Las contraseñas tienen que ser iguales");
+    } else if (size(formData.password) < 6) {
+      toastRef.current.show(
+        "La contraseña tiene que tener al menos 6 caracteres",
+      );
     } else {
-      console.log("ok");
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(formData.email, formData.password)
+        .then(() => {
+          navigation.navigate("account");
+        })
+        .catch(() => {
+          toastRef.current.show("El email ya está en uso, pruebe otro");
+        });
     }
   };
 
