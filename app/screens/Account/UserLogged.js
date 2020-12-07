@@ -4,7 +4,7 @@ import { Button } from "react-native-elements";
 import Toast from "react-native-easy-toast";
 import * as firebase from "firebase";
 import Loading from "../../components/Loading";
-import InforUser from "../../components/Account/InfoUser";
+import InfoUser from "../../components/Account/InfoUser";
 import AccountOptions from "../../components/Account/AccountOptions";
 
 export default function UsserLogged() {
@@ -25,7 +25,7 @@ export default function UsserLogged() {
   return (
     <View style={styles.viewUserInfo}>
       {userInfo && (
-        <InforUser
+        <InfoUser
           userInfo={userInfo}
           toastRef={toastRef}
           setLoading={setLoading}
