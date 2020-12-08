@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import { StyleSheet, View, ScrollView, Alert, Dimensions } from "react-native";
 import { Icon, Avatar, Image, Input, Button } from "react-native-elements";
+import * as Permissions from "expo-permissions";
+import * as ImagePicker from "expo-image-picker";
 
 export default function AddRestauranForm(props) {
   const { toastRef, setIsLoading, navigation } = props;
   const [restaurantName, setRestaurantName] = useState("");
   const [restaurantAddress, setRestaurantAddress] = useState("");
   const [restaurantDescription, setRestaurantDescription] = useState("");
+  const [imagesSelected, setImagesSelected] = useState([]);
 
   const addRestaurant = () => {
+    console.log("OK");
     console.log(restaurantName);
     console.log(restaurantAddress);
     console.log(restaurantDescription);
+    console.log(imagesSelected);
   };
 
   return (
@@ -20,6 +25,11 @@ export default function AddRestauranForm(props) {
         setRestaurantName={setRestaurantName}
         setRestaurantAddress={setRestaurantAddress}
         setRestaurantDescription={setRestaurantDescription}
+      />
+      <UploadImage
+        toastRef={toastRef}
+        imagesSelected={imagesSelected}
+        setImagesSelected={setImagesSelected}
       />
       <Button
         title="Crear Restaurante"
@@ -59,6 +69,48 @@ function FormAdd(props) {
   );
 }
 
+function UploadImage(props) {
+  const { toastRef, imagesSelected, setImagesSelected } = props;
+  const imageSelect = async () => {
+    const resultPermissions = await Permissions.askAsync(
+      Permissions.CAMERA_ROLL,
+    );
+
+    if (resultPermissions === "denied") {
+      toastRef.current.show(
+        "Es necesario aceptar los permisos de la galería, si los has rechazado tienes que ir a ajustes y activarlos manualmente.",
+        3000,
+      );
+    } else {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: 4.3,
+      });
+
+      if (result.cancelled) {
+        toastRef.current.show(
+          "Has cerrado la galería sin seleccionar ninguna imagen.",
+          2000,
+        );
+      } else {
+        setImagesSelected([...imagesSelected, result.uri]);
+      }
+    }
+  };
+
+  return (
+    <View style={styles.viewImage}>
+      <Icon
+        type="material-community"
+        name="camera"
+        color="#7a7a7a"
+        containerStyle={styles.containerIcon}
+        onPress={imageSelect}
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   scrollView: {
     height: "100%",
@@ -79,5 +131,19 @@ const styles = StyleSheet.create({
   btnAddRestaurant: {
     backgroundColor: "#00a680",
     margin: 20,
+  },
+  viewImage: {
+    flexDirection: "row",
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 30,
+  },
+  containerIcon: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+    height: 70,
+    width: 70,
+    backgroundColor: "#e3e3e3",
   },
 });
