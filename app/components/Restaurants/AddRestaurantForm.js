@@ -12,6 +12,8 @@ import Modal from "../Modal";
 import { firebaseApp } from "../../utils/firebase";
 import firebase from "firebase/app";
 import "firebase/storage";
+import "firebase/firestore";
+const db = firebase.firestore(firebaseApp);
 
 const WidthScreen = Dimensions.get("window").width;
 
@@ -36,8 +38,29 @@ export default function AddRestauranForm(props) {
     } else {
       setIsLoading(true);
       uploadImageStorage().then((response) => {
-        setIsLoading(false);
-        console.log(response);
+        db.collection("restaurants")
+          .add({
+            name: restaurantName,
+            address: restaurantAddress,
+            description: restaurantDescription,
+            location: locationRestaurant,
+            images: response,
+            rating: 0,
+            ratingTotal: 0,
+            quantityVoting: 0,
+            createAt: new Date(),
+            createBy: firebase.auth().currentUser.uid,
+          })
+          .then(() => {
+            setIsLoading(false);
+            navigation.navigate("restaurants");
+          })
+          .catch(() => {
+            setIsLoading(false);
+            toastRef.current.show(
+              "Error al subir el restaurante, inéntelo más tarde.",
+            );
+          });
       });
     }
   };
